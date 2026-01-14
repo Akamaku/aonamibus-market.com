@@ -1,0 +1,38 @@
+:root { --red: #E60012; --dark: #333; }
+body { font-family: sans-serif; margin: 0; background: #f4f4f4; color: #333; }
+.main-header { background: var(--red); color: white; padding: 15px 5%; display: flex; justify-content: space-between; }
+.main-header a { color: white; text-decoration: none; font-weight: bold; }
+.hero { background: var(--red); color: white; text-align: center; padding: 40px; }
+.container { padding: 20px 5%; }
+.container-small { max-width: 600px; margin: 20px auto; padding: 20px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.card { background: white; padding: 15px; border-radius: 8px; border-top: 5px solid var(--red); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.btn-red-small { background: var(--red); color: white; text-decoration: none; padding: 8px; display: block; text-align: center; border-radius: 4px; margin-top: 10px; }
+.input-google { width: 100%; padding: 13px; margin: 10px 0; border: 1px solid #dadce0; border-radius: 4px; }
+.btn-google-blue { background: #1a73e8; color: white; border: none; padding: 10px 24px; border-radius: 4px; float: right; cursor: pointer; }
+.google-logo span:nth-child(1) { color: #4285F4; } .google-logo span:nth-child(2) { color: #EA4335; } 
+.admin-del { color: red; border: none; background: none; cursor: pointer; font-size: 12px; }
+.w-100 { width: 100%; }
+input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; }
+:root { --red: #E60012; --dark: #333; }
+body { font-family: sans-serif; margin: 0; background: #f8f9fa; }
+.main-header { background: var(--red); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; }
+.main-header a { color: white; text-decoration: none; font-weight: bold; }
+.hero { background: var(--red); color: white; text-align: center; padding: 40px; }
+.search-container { max-width: 600px; margin: 20px auto 0; display: flex; gap: 10px; }
+.search-container input { flex: 1; padding: 12px; border: none; border-radius: 4px; }
+.container { padding: 30px 5%; }
+.container-small { max-width: 700px; margin: auto; padding: 20px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.card { background: white; padding: 20px; border-radius: 8px; border-top: 4px solid var(--red); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.card-img { width: 100%; height: 180px; background: #eee; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.btn-red-small { background: var(--red); color: white; text-decoration: none; padding: 10px; display: block; text-align: center; border-radius: 4px; margin-top: 15px; font-weight: bold; }
+.btn-red-full { background: var(--red); color: white; border: none; padding: 15px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; }
+.btn-dark { background: var(--dark); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+.admin-del { color: red; border: none; background: none; cursor: pointer; font-weight: bold; }
+.spec-table { width:100%; border-collapse: collapse; margin-top: 20px; }
+.spec-table th, .spec-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+.spec-table th { background: #f4f4f4; width: 30%; }
+input, select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+.form-row { display: flex; gap: 15px; } .form-row > div { flex: 1; }
+.user-badge { background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 20px; font-size: 13px; }

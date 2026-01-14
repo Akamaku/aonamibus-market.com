@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>マイページ | Bus-Market</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header"><h1>マイページ</h1><a href="index.html">トップ</a></header>
+    <div class="container">
+        <div class="card">
+            <h2>👤 アカウント: <span id="m-nick"></span></h2>
+            <button onclick="localStorage.clear(); location.href='index.html';" class="btn-dark">全データ削除してログアウト</button>
+        </div>
+
+        <h3>📦 自分の出品車両（取り消し）</h3>
+        <div id="my-list" class="grid"></div>
+
+        <h3>⭐ お気に入りリスト</h3>
+        <div id="fav-list" class="grid"></div>
+
+        <h3>🕒 閲覧履歴</h3>
+        <div id="history-list" class="grid"></div>
+    </div>
+
+    <script>
+        const me = localStorage.getItem('userEmail');
+        document.getElementById('m-nick').innerText = localStorage.getItem('userNickname');
+
+        const all = JSON.parse(localStorage.getItem('allVehicles')) || [];
+        const favs = JSON.parse(localStorage.getItem('userFavorites')) || [];
+        const hists = JSON.parse(localStorage.getItem('viewHistory')) || [];
+
+        // 出品取消
+        all.filter(v => v.ownerEmail === me).forEach(v => {
+            document.getElementById('my-list').innerHTML += `
+                <div class="card">
+                    <h4>${v.title}</h4>
+                    <button onclick="delPost(${v.id})" class="admin-del">❌ 出品を取り消す</button>
+                </div>`;
+        });
+
+        // お気に入り
+        favs.forEach(f => {
+            document.getElementById('fav-list').innerHTML += `<div class="card"><a href="detail.html?id=${f.id}">${f.title}</a></div>`;
+        });
+
+        // 履歴
+        hists.reverse().forEach(h => {
+            document.getElementById('history-list').innerHTML += `<div class="card" style="font-size:12px;"><b>${h.title}</b><br>${h.time}</div>`;
+        });
+
+        function delPost(id) {
+            if(confirm("この車両の出品を取り消しますか？")) {
+                const updated = all.filter(v => v.id !== id);
+                localStorage.setItem('allVehicles', JSON.stringify(updated));
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

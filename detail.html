@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>車両詳細 | Bus-Market</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header"><a href="index.html" class="logo">Bus-Market</a><nav><a href="index.html">戻る</a></nav></header>
+    <main class="container-small">
+        <div id="v-img-box" style="width:100%; height:400px; background:#eee; border-radius:8px; overflow:hidden; margin-bottom:20px; display:flex; align-items:center; justify-content:center;">
+            <img id="v-img" style="width:100%; height:100%; object-fit:cover; display:none;">
+            <span id="no-img">NO IMAGE</span>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 id="v-title" style="color:var(--red);"></h1>
+            <button id="fav-btn" onclick="toggleFavorite()" class="btn-dark">☆ お気に入り</button>
+        </div>
+        <p>出品者: <b id="v-owner"></b></p>
+
+        <table class="spec-table">
+            <tr><th>メーカー</th><td id="v-maker"></td></tr>
+            <tr><th>型式</th><td id="v-vin"></td></tr>
+            <tr><th>走行距離</th><td id="v-km"></td></tr>
+            <tr><th>ミッション</th><td id="v-tm"></td></tr>
+        </table>
+
+        <h3>状態詳細</h3>
+        <div id="v-cond" class="card" style="background:#fff0f0;"></div>
+
+        <button onclick="sendMail()" class="btn-red-full" style="margin-top:30px;">管理者に問い合わせる</button>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(location.search);
+        const vid = params.get('id');
+        const v = (JSON.parse(localStorage.getItem('allVehicles')) || []).find(item => item.id == vid);
+
+        if (v) {
+            document.getElementById('v-title').innerText = v.title;
+            document.getElementById('v-owner').innerText = v.owner;
+            document.getElementById('v-maker').innerText = v.manufacturer;
+            document.getElementById('v-vin').innerText = v.vin_type;
+            document.getElementById('v-km').innerText = v.mileage;
+            document.getElementById('v-tm').innerText = v.mission;
+            document.getElementById('v-cond').innerText = v.condition;
+            if(v.image) {
+                document.getElementById('v-img').src = v.image;
+                document.getElementById('v-img').style.display = 'block';
+                document.getElementById('no-img').style.display = 'none';
+            }
+            // 履歴保存
+            let history = JSON.parse(localStorage.getItem('viewHistory')) || [];
+            if(!history.some(h => h.id == v.id)) {
+                history.push({id: v.id, title: v.title, time: new Date().toLocaleString()});
+                localStorage.setItem('viewHistory', JSON.stringify(history.slice(-10)));
+            }
+            updateFavBtn();
+        }
+
+        function toggleFavorite() {
+            let favs = JSON.parse(localStorage.getItem('userFavorites')) || [];
+            const idx = favs.findIndex(f => f.id == v.id);
+            if(idx > -1) favs.splice(idx, 1); else favs.push({id: v.id, title: v.title});
+            localStorage.setItem('userFavorites', JSON.stringify(favs));
+            updateFavBtn();
+        }
+
+        function updateFavBtn() {
+            const favs = JSON.parse(localStorage.getItem('userFavorites')) || [];
+            document.getElementById('fav-btn').innerText = favs.some(f => f.id == v.id) ? "★ お気に入り解除" : "☆ お気に入り";
+        }
+
+        function sendMail() {
+            window.location.href = `mailto:akamaku.1rasuto@gmail.com?subject=問い合わせ:${v.title}&body=車両ID:${v.id}`;
+        }
+    </script>
+</body>
+</html>

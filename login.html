@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - Google アカウント</title>
+    <style>
+        /* 前回のスタイルを継承しつつ追加 */
+        body { font-family: 'Roboto', arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #fff; }
+        .container { width: 100%; max-width: 450px; padding: 48px 40px 36px; border: 1px solid #dadce0; border-radius: 8px; text-align: center; }
+        .logo { font-size: 24px; margin-bottom: 10px; font-weight: 500; }
+        .logo span:nth-child(1) { color: #4285F4; } .logo span:nth-child(2) { color: #EA4335; } .logo span:nth-child(3) { color: #FBBC05; }
+        .logo span:nth-child(4) { color: #4285F4; } .logo span:nth-child(5) { color: #34A853; } .logo span:nth-child(6) { color: #EA4335; }
+        h1 { font-size: 24px; font-weight: 400; margin: 0 0 8px; color: #202124; }
+        p { font-size: 16px; color: #202124; margin-bottom: 40px; }
+        .input-group { position: relative; margin-bottom: 10px; text-align: left; }
+        input { width: 100%; padding: 13px 15px; border: 1px solid #dadce0; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
+        input:focus { border: 2px solid #1a73e8; outline: none; }
+        .hidden { display: none; }
+        .btn-next { background-color: #1a73e8; color: white; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 500; cursor: pointer; font-size: 14px; float: right; }
+        .user-display { border: 1px solid #dadce0; border-radius: 20px; padding: 5px 15px; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 14px; }
+        .footer-btns { margin-top: 40px; overflow: hidden; }
+        .error-text { color: #d93025; font-size: 12px; text-align: left; margin-top: 5px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span></div>
+
+    <div id="step-email">
+        <h1>ログイン</h1>
+        <p>Bus-Market に進む</p>
+        <div class="input-group">
+            <input type="email" id="email" placeholder="メールアドレス" required>
+            <div id="email-error" class="error-text">有効なGmailを入力してください</div>
+        </div>
+        <div class="footer-btns"><button class="btn-next" onclick="toPassword()">次へ</button></div>
+    </div>
+
+    <div id="step-password" class="hidden">
+        <h1>ようこそ</h1>
+        <div class="user-display"><span id="display-email"></span></div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="このサイトで使用するパスワードを入力">
+        </div>
+        <div class="footer-btns"><button class="btn-next" onclick="toNicknameOrFinish()">次へ</button></div>
+    </div>
+
+    <div id="step-nickname" class="hidden">
+        <h1>プロフィール設定</h1>
+        <p>取引ページで使用する名前を決めてください</p>
+        <div class="input-group">
+            <input type="text" id="nickname" placeholder="ニックネーム" required>
+        </div>
+        <div class="footer-btns"><button class="btn-red btn-next" onclick="finishAll()">登録を完了する</button></div>
+    </div>
+</div>
+
+<script>
+    // 擬似的なユーザーデータベース（本来はサーバー側で管理）
+    const registeredUsers = ["test@gmail.com"]; 
+
+    function toPassword() {
+        const email = document.getElementById('email').value;
+        if (/^[a-z0-9](\.?[a-z0-9]){5,}@gmail\.com$/.test(email)) {
+            document.getElementById('step-email').classList.add('hidden');
+            document.getElementById('step-password').classList.remove('hidden');
+            document.getElementById('display-email').innerText = email;
+        } else {
+            document.getElementById('email-error').style.display = 'block';
+        }
+    }
+
+    function toNicknameOrFinish() {
+        const email = document.getElementById('email').value;
+        // 登録済みリストにない場合はニックネーム設定へ
+        if (!registeredUsers.includes(email)) {
+            document.getElementById('step-password').classList.add('hidden');
+            document.getElementById('step-nickname').classList.remove('hidden');
+        } else {
+            finishAll();
+        }
+    }
+
+    function finishAll() {
+        const email = document.getElementById('email').value;
+        const nickname = document.getElementById('nickname').value || email.split('@')[0];
+        
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userNickname', nickname);
+        
+        alert(`ようこそ ${nickname} さん！バス取引を開始します。`);
+        window.location.href = 'index.html';
+    }
+</script>
+</body>
+</html>

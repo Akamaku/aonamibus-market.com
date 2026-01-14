@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>出品 | Bus-Market</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="main-header"><h1>車両出品</h1><a href="index.html">戻る</a></header>
+    <div class="container-small card">
+        <form id="postForm">
+            <label>車両画像</label>
+            <input type="file" id="imageInput" accept="image/*">
+            <div id="img-preview" style="width:100%; height:200px; background:#eee; margin-bottom:15px; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:4px;">
+                <p style="color:#999;">画像プレビュー</p>
+            </div>
+
+            <label>タイトル</label><input type="text" id="title" required>
+            <div class="form-row">
+                <div><label>メーカー</label><select id="maker"><option>いすゞ</option><option>日野</option><option>三菱ふそう</option><option>日産ディーゼル</option><option>トヨタ</option><option>その他</option></select></div>
+                <div><label>サイズ</label><select id="size"><option>大型</option><option>中型</option><option>小型</option></select></div>
+            </div>
+            <div class="form-row">
+                <div><label>車種名</label><input type="text" id="model_name" required></div>
+                <div><label>型式</label><input type="text" id="vin_type" required></div>
+            </div>
+            <div class="form-row">
+                <div><label>エンジン型式</label><input type="text" id="engine_type"></div>
+                <div><label>燃料</label><input type="text" id="fuel"></div>
+            </div>
+            <div class="form-row">
+                <div><label>排気量</label><input type="text" id="displacement"></div>
+                <div><label>走行距離</label><input type="text" id="mileage" required></div>
+            </div>
+            <label>ミッション</label><select id="mission"><option>AT</option><option>MT</option><option>AMT</option></select>
+            <label>状態詳細（白煙など）</label><textarea id="condition" rows="5" required></textarea>
+            <button type="submit" class="btn-red-full">出品する</button>
+        </form>
+    </div>
+
+    <script>
+        let imageData = "";
+        document.getElementById('imageInput').onchange = function(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imageData = event.target.result;
+                document.getElementById('img-preview').innerHTML = `<img src="${imageData}" style="width:100%; height:100%; object-fit:cover;">`;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        document.getElementById('postForm').onsubmit = function(e) {
+            e.preventDefault();
+            const all = JSON.parse(localStorage.getItem('allVehicles')) || [];
+            all.push({
+                id: Date.now(),
+                image: imageData,
+                title: document.getElementById('title').value,
+                manufacturer: document.getElementById('maker').value,
+                size: document.getElementById('size').value,
+                model_name: document.getElementById('model_name').value,
+                vin_type: document.getElementById('vin_type').value,
+                engine_type: document.getElementById('engine_type').value,
+                fuel: document.getElementById('fuel').value,
+                displacement: document.getElementById('displacement').value,
+                mileage: document.getElementById('mileage').value,
+                mission: document.getElementById('mission').value,
+                condition: document.getElementById('condition').value,
+                owner: localStorage.getItem('userNickname'),
+                ownerEmail: localStorage.getItem('userEmail'),
+                createdAt: Date.now()
+            });
+            localStorage.setItem('allVehicles', JSON.stringify(all));
+            location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>
