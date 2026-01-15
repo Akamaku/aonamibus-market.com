@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>車両詳細 | kakuBus-Market</title>
+    <title>車両詳細 | Bus-Market</title>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; background: #f4f7f8; color: #333; line-height: 1.6; }
         .main-header { background: #e60012; color: white; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -17,7 +17,7 @@
 
         .title-section { border-bottom: 3px solid #e60012; margin-bottom: 25px; padding-bottom: 15px; }
         .title-section h2 { margin: 0; font-size: 1.8rem; }
-        .seller-info { color: #666; font-size: 0.9rem; margin-top: 5px; }
+        .vehicle-id-tag { display: inline-block; background: #333; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 10px; }
         
         /* スペック表 */
         .spec-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
@@ -27,13 +27,17 @@
         .status-box { background: #fffcf0; border: 1px solid #f0e68c; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
         .status-box h4 { margin-top: 0; color: #856404; }
 
-        /* 問い合わせフォーム */
-        .contact-section { background: #f0f7ff; border: 1px solid #bcdbff; padding: 25px; border-radius: 10px; margin-top: 40px; }
-        .contact-section h3 { margin-top: 0; color: #0056b3; border-bottom: 1px solid #bcdbff; padding-bottom: 10px; }
+        /* 問い合わせフォーム（事務局仲介用） */
+        .contact-section { background: #fff5f5; border: 1px solid #feb2b2; padding: 25px; border-radius: 10px; margin-top: 40px; }
+        .contact-section h3 { margin-top: 0; color: #c53030; border-bottom: 1px solid #feb2b2; padding-bottom: 10px; }
+        .contact-notice { font-size: 0.85rem; color: #742a2a; background: #fff1f1; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #fed7d7; }
+        
         .contact-form input, .contact-form textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
         .contact-form textarea { height: 120px; resize: vertical; }
-        .btn-send { background: #007bff; color: white; border: none; padding: 18px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: background 0.3s; }
-        .btn-send:hover { background: #0056b3; }
+        
+        .btn-send { background: #e60012; color: white; border: none; padding: 18px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
+        .btn-send:hover { background: #c1000f; }
+        .btn-send:disabled { background: #ccc; cursor: not-allowed; }
 
         .btn-back { display: inline-block; margin-bottom: 15px; color: #e60012; text-decoration: none; font-weight: bold; }
         .loading { text-align: center; padding: 100px; font-size: 1.2rem; color: #999; }
@@ -50,7 +54,8 @@
 </main>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwrfihhoRL7pVNJRNEh4iOXexJicIpUTNlmZJ-Ssstd3fWT2VEPkXE2CaKjxuAU6Yl3/exec";
+    // 最新のGAS URL
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyD62tpSMHLqjuLctY3X8uZGXCmb_6FaDEJJYoC5NuoEhVSwbd_wiFpqLphqi-eCKOT/exec";
     
     async function init() {
         const area = document.getElementById('content-area');
@@ -80,8 +85,8 @@
                 </div>
 
                 <div class="title-section">
+                    <div class="vehicle-id-tag">車両ID: ${vehicle.id}</div>
                     <h2>${vehicle.title || '無題の車両'}</h2>
-                    <div class="seller-info">出品者: ${vehicle.owner || '匿名'}</div>
                 </div>
 
                 <h3>車両スペック詳細</h3>
@@ -102,16 +107,16 @@
                 </div>
 
                 <div class="contact-section">
-                    <h3>この車両について問い合わせる</h3>
-                    <p style="font-size: 0.85rem; color: #555; margin-bottom: 20px;">
-                        ※送信された内容は販売元と事務局(aonamibus.market50@gmail.com)へ届きます。
-                    </p>
+                    <h3>この車両について事務局へ問い合わせる</h3>
+                    <div class="contact-notice">
+                        こちらは事務局宛の問い合わせフォームです。送信後、内容を確認の上、事務局より出品者へお繋ぎ、または担当者より回答させていただきます。
+                    </div>
                     <div class="contact-form">
                         <input type="text" id="c-name" placeholder="お名前" value="${localStorage.getItem('userNickname') || ''}">
-                        <input type="email" id="c-email" placeholder="返信用メールアドレス">
-                        <textarea id="c-msg" placeholder="購入希望、内見予約、質問などをご記入ください。"></textarea>
-                        <button class="btn-send" id="send-btn" onclick="sendContact('${vehicle.email}', '${vehicle.title}')">
-                            メッセージを送信する
+                        <input type="email" id="c-email" placeholder="あなたのメールアドレス">
+                        <textarea id="c-msg" placeholder="購入の意思、内見の希望、質問などをご記入ください。"></textarea>
+                        <button class="btn-send" id="send-btn" onclick="sendContact('${vehicle.id}', '${vehicle.title}')">
+                            事務局へメッセージを送信する
                         </button>
                     </div>
                 </div>
@@ -123,7 +128,7 @@
         }
     }
 
-    async function sendContact(sellerEmail, vehicleTitle) {
+    async function sendContact(vId, vehicleTitle) {
         const name = document.getElementById('c-name').value;
         const email = document.getElementById('c-email').value;
         const msg = document.getElementById('c-msg').value;
@@ -138,23 +143,24 @@
         btn.innerText = "送信中...";
 
         try {
-            await fetch(GAS_URL, {
+            const response = await fetch(GAS_URL, {
                 method: "POST",
                 body: JSON.stringify({
                     type: "contact",
-                    sellerEmail: sellerEmail,
+                    vehicleId: vId,       // 管理者が特定するためのID
                     vehicleTitle: vehicleTitle,
                     userName: name,
                     userEmail: email,
                     message: msg
                 })
             });
-            alert("問い合わせを送信しました！販売元からの返信をお待ちください。");
+            
+            alert("事務局へ送信されました。内容を確認後、折り返しご連絡いたします。");
             location.reload();
         } catch (e) {
-            alert("送信に失敗しました。時間をおいて再度お試しください。");
+            alert("送信に失敗しました。ネットワーク環境を確認の上、再度お試しください。");
             btn.disabled = false;
-            btn.innerText = "メッセージを送信する";
+            btn.innerText = "事務局へメッセージを送信する";
         }
     }
 
