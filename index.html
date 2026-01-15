@@ -3,109 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus-Market | 架空バスプロのためのバス売買マーケット</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Bus-Market | 車両一覧</title>
     <style>
-        /* ヘッダー周りの微調整 */
-        #user-nav {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .user-badge {
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .empty-msg {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 50px;
-            color: #888;
-            font-size: 1.2rem;
-        }
+        body { font-family: sans-serif; margin: 0; background: #f4f4f4; }
+        .main-header { background: #e60012; color: white; padding: 15px; text-align: center; }
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card-img { width: 100%; height: 200px; background: #ddd; }
+        .card-img img { width: 100%; height: 100%; object-fit: cover; }
+        .card-content { padding: 15px; }
+        .card-title { font-size: 1.2rem; margin: 0 0 10px; color: #333; }
+        .card-spec { font-size: 0.9rem; color: #666; line-height: 1.5; }
+        .btn-detail { display: block; text-align: center; background: #333; color: white; padding: 10px; text-decoration: none; border-radius: 4px; margin-top: 10px; }
+        .empty-msg { text-align: center; padding: 50px; color: #888; }
     </style>
 </head>
 <body>
     <header class="main-header">
-        <h1 onclick="location.href='index.html'" style="cursor:pointer;">Bus-Market</h1>
-        <nav id="user-nav"></nav>
+        <h1>Bus-Market</h1>
     </header>
 
     <main class="container">
         <div class="grid" id="vehicle-grid">
-            <div class="empty-msg">データを読み込んでいます...</div>
+            <div class="empty-msg">読み込み中...</div>
         </div>
     </main>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxqifQGgA39sQ9SFTzphksRS2VESA2JIKbJ08FSa9O-PCCIxV9E3u2QAVaUCB8m0xx8/exec";
+        // あなたのGASのURLをここに貼り付けてください
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyBgNRke_RVNCM2j4whbDWwDfzXTf1SxhgFwrujGVV5D7xQwNYmwKu96tNZweoH3B79/exec";
 
         async function loadVehicles() {
             const grid = document.getElementById('vehicle-grid');
-            
             try {
-                // キャッシュ回避のためにランダムな数字を末尾に付ける
-                const response = await fetch(`${GAS_URL}?t=${Date.now()}`);
-                
-                if (!response.ok) throw new Error('Network response was not ok');
-                
+                const response = await fetch(GAS_URL);
                 const data = await response.json();
-                console.log("取得したデータ:", data); // ブラウザのコンソールで確認用
 
                 if (!data || data.length === 0) {
                     grid.innerHTML = '<div class="empty-msg">出品されている車両はありません</div>';
                     return;
                 }
 
-                grid.innerHTML = "";
-                // 最新順に表示
+                grid.innerHTML = ""; // 読み込み中表示を消す
+
                 data.reverse().forEach(v => {
-                    // スプレッドシートの項目名が違っていてもエラーにならないように || で空文字を指定
-                    const title = v.title || v.車種名 || "無題の車両";
-                    const maker = v.maker || v.メーカー || "";
-                    const mileage = v.mileage || v.走行距離 || "-";
-                    const img = v.image || v.画像 || "";
+                    // スプレッドシートの項目名に合わせた抽出
+                    const title = v.title || "車種不明";
+                    const maker = v.maker || "";
+                    const mileage = v.mileage || "-";
+                    const mission = v.mission || "";
+                    const imgData = v.image || "";
 
-                    grid.innerHTML += `
-                        <div class="card">
-                            <div class="card-img">
-                                ${img ? `<img src="${img}">` : '<div style="height:200px; background:#ddd; display:flex; align-items:center; justify-content:center;">NO IMAGE</div>'}
-                            </div>
-                            <div class="card-content">
-                                <h3 class="card-title">${title}</h3>
-                                <p class="card-spec">${maker} / ${mileage}</p>
-                                <a href="detail.html?id=${v.id}" class="btn-red-small">詳細を見る</a>
-                                <div style="font-size:10px; color:#999; margin-top:5px;">出品者: ${v.owner || 'ゲスト'}</div>
-                            </div>
-                        </div>`;
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-img">
+                            ${imgData ? `<img src="${imgData}">` : '<div style="text-align:center; padding-top:80px;">NO IMAGE</div>'}
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">${title}</h3>
+                            <p class="card-spec">
+                                <b>メーカー:</b> ${maker}<br>
+                                <b>走行距離:</b> ${mileage}<br>
+                                <b>シフト:</b> ${mission}
+                            </p>
+                            <a href="detail.html?id=${v.id}" class="btn-detail">詳細を見る</a>
+                        </div>
+                    `;
+                    grid.appendChild(card);
                 });
-
             } catch (error) {
-                console.error("エラー詳細:", error);
-                grid.innerHTML = `<div class="empty-msg">
-                    データの読み込みに失敗しました。<br>
-                    <small style="color:red;">理由: ${error.message}</small><br><br>
-                    <button onclick="location.reload()" class="btn-dark">再読み込み</button>
-                </div>`;
+                grid.innerHTML = '<div class="empty-msg">読み込みに失敗しました</div>';
+                console.error(error);
             }
         }
 
-        // ログイン状態の表示
-        function updateHeader() {
-            const nav = document.getElementById('user-nav');
-            const nickname = localStorage.getItem('userNickname');
-            if (nickname) {
-                nav.innerHTML = `<span style="color:white; margin-right:10px;">👤 ${nickname}</span>
-                                 <button class="nav-btn" onclick="location.href='post.html'">出品する</button>`;
-            } else {
-                nav.innerHTML = `<button class="nav-btn" onclick="location.href='login.html'">ログイン</button>`;
-            }
-        }
-
-        window.onload = () => {
-            updateHeader();
-            loadVehicles();
-        };
+        window.onload = loadVehicles;
     </script>
 </body>
 </html>
