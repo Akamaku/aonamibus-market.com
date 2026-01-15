@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus-Market | プロのためのバス売買マーケット</title>
+    <title>Bus-Market | 架空バスプロのためのバス売買マーケット</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* ヘッダー周りの微調整 */
@@ -26,119 +26,82 @@
     </style>
 </head>
 <body>
-
     <header class="main-header">
         <h1 onclick="location.href='index.html'" style="cursor:pointer;">Bus-Market</h1>
-        <nav id="user-nav">
-            </nav>
+        <nav id="user-nav"></nav>
     </header>
 
-    <div class="hero">
-        <h1>プロのためのバス売買マーケット</h1>
-        <p>ログインすれば誰でも自由に出品・共有が可能です</p>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="車種、メーカー、状態から探す...">
-            <button onclick="searchVehicles()" class="btn-dark">検索</button>
-        </div>
-    </div>
-
     <main class="container">
-        <h2 style="border-left: 5px solid #e60012; padding-left: 15px; margin-bottom: 20px;">最新の出品車両</h2>
         <div class="grid" id="vehicle-grid">
-            <div class="empty-msg">データを読み込み中...</div>
+            <div class="empty-msg">データを読み込んでいます...</div>
         </div>
     </main>
 
     <script>
-        // あなたのGASデプロイURL
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxqifQGgA39sQ9SFTzphksRS2VESA2JIKbJ08FSa9O-PCCIxV9E3u2QAVaUCB8m0xx8/exec";
 
-        /**
-         * 1. ログイン状態に応じてヘッダーボタンを生成
-         */
-        function updateHeader() {
-            const nav = document.getElementById('user-nav');
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            const nickname = localStorage.getItem('userNickname');
-
-            if (isLoggedIn) {
-                // ログインしている場合
-                nav.innerHTML = `
-                    <span class="user-badge" style="color:white;">👤 ${nickname}</span>
-                    <button class="nav-btn" onclick="location.href='post.html'">車両を出品</button>
-                    <button class="nav-btn" onclick="location.href='mypage.html'">マイページ</button>
-                    <button class="btn-logout-small" onclick="handleLogout()">解除</button>
-                `;
-            } else {
-                // ログインしていない場合
-                nav.innerHTML = `
-                    <button class="nav-btn" onclick="location.href='login.html'">ログイン / 新規登録</button>
-                `;
-            }
-        }
-
-        /**
-         * 2. スプレッドシートから車両データを取得して表示
-         */
         async function loadVehicles() {
             const grid = document.getElementById('vehicle-grid');
-
+            
             try {
-                const response = await fetch(GAS_URL);
+                // キャッシュ回避のためにランダムな数字を末尾に付ける
+                const response = await fetch(`${GAS_URL}?t=${Date.now()}`);
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
                 const data = await response.json();
+                console.log("取得したデータ:", data); // ブラウザのコンソールで確認用
 
-                // データを最新順（スプレッドシートの下の方にあるものほど新しい前提）に並び替え
-                const sortedData = data.reverse();
+                if (!data || data.length === 0) {
+                    grid.innerHTML = '<div class="empty-msg">出品されている車両はありません</div>';
+                    return;
+                }
 
-                grid.innerHTML = sortedData.length ? '' : '<div class="empty-msg">現在、出品されている車両はありません。</div>';
+                grid.innerHTML = "";
+                // 最新順に表示
+                data.reverse().forEach(v => {
+                    // スプレッドシートの項目名が違っていてもエラーにならないように || で空文字を指定
+                    const title = v.title || v.車種名 || "無題の車両";
+                    const maker = v.maker || v.メーカー || "";
+                    const mileage = v.mileage || v.走行距離 || "-";
+                    const img = v.image || v.画像 || "";
 
-                sortedData.forEach(v => {
-                    // 各項目の名前はスプレッドシート1行目のヘッダー名と一致させる必要があります
-                    const imgTag = v.image ? `<img src="${v.image}" style="width:100%; height:100%; object-fit:cover;" alt="車両画像">` : '<div style="padding:40px; color:#ccc;">NO IMAGE</div>';
-                    
                     grid.innerHTML += `
                         <div class="card">
-                            <div class="card-img">${imgTag}</div>
+                            <div class="card-img">
+                                ${img ? `<img src="${img}">` : '<div style="height:200px; background:#ddd; display:flex; align-items:center; justify-content:center;">NO IMAGE</div>'}
+                            </div>
                             <div class="card-content">
-                                <h3 class="card-title">${v.title || '無題の車両'}</h3>
-                                <p class="card-spec"><b>メーカー:</b> ${v.manufacturer || '-'} / <b>走行:</b> ${v.mileage || '-'}</p>
-                                <a href="detail.html?id=${v.id || ''}" class="btn-red-small">詳細を見る</a>
-                                <div class="card-footer" style="margin-top:10px; font-size:12px; color:#666; display:flex; justify-content:space-between;">
-                                    <span>出品者: ${v.owner || '匿名'}</span>
-                                </div>
+                                <h3 class="card-title">${title}</h3>
+                                <p class="card-spec">${maker} / ${mileage}</p>
+                                <a href="detail.html?id=${v.id}" class="btn-red-small">詳細を見る</a>
+                                <div style="font-size:10px; color:#999; margin-top:5px;">出品者: ${v.owner || 'ゲスト'}</div>
                             </div>
                         </div>`;
                 });
+
             } catch (error) {
-                console.error("データ取得エラー:", error);
-                grid.innerHTML = '<div class="empty-msg">データの読み込みに失敗しました。GASの公開設定を確認してください。</div>';
+                console.error("エラー詳細:", error);
+                grid.innerHTML = `<div class="empty-msg">
+                    データの読み込みに失敗しました。<br>
+                    <small style="color:red;">理由: ${error.message}</small><br><br>
+                    <button onclick="location.reload()" class="btn-dark">再読み込み</button>
+                </div>`;
             }
         }
 
-        /**
-         * 3. ログアウト処理
-         */
-        function handleLogout() {
-            if (confirm("ログアウト（解除）しますか？")) {
-                localStorage.clear();
-                location.reload();
+        // ログイン状態の表示
+        function updateHeader() {
+            const nav = document.getElementById('user-nav');
+            const nickname = localStorage.getItem('userNickname');
+            if (nickname) {
+                nav.innerHTML = `<span style="color:white; margin-right:10px;">👤 ${nickname}</span>
+                                 <button class="nav-btn" onclick="location.href='post.html'">出品する</button>`;
+            } else {
+                nav.innerHTML = `<button class="nav-btn" onclick="location.href='login.html'">ログイン</button>`;
             }
         }
 
-        /**
-         * 4. 簡易検索機能（表示されているカードを絞り込む）
-         */
-        function searchVehicles() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.getElementsByClassName('card');
-
-            for (let card of cards) {
-                const text = card.innerText.toLowerCase();
-                card.style.display = text.includes(input) ? "block" : "none";
-            }
-        }
-
-        // ページ読み込み時に実行
         window.onload = () => {
             updateHeader();
             loadVehicles();
