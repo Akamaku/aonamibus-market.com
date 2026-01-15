@@ -3,108 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>車両詳細 | Bus-Market</title>
+    <title>車両詳細 | kakuBus-Market</title>
     <style>
-        body { font-family: sans-serif; margin: 0; background: #f9f9f9; color: #333; line-height: 1.6; }
-        .main-header { background: #e60012; color: white; padding: 15px; text-align: center; }
-        .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; background: #f4f7f8; color: #333; line-height: 1.6; }
+        .main-header { background: #e60012; color: white; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .main-header h1 { margin: 0; cursor: pointer; font-size: 1.5rem; }
+        
+        .container { max-width: 900px; margin: 20px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         
         /* 画像エリア */
-        .main-image { width: 100%; border-radius: 8px; margin-bottom: 20px; background: #eee; min-height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .main-image img { width: 100%; height: auto; object-fit: contain; }
+        .main-image { width: 100%; border-radius: 8px; margin-bottom: 25px; background: #eee; min-height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #ddd; }
+        .main-image img { width: 100%; height: auto; max-height: 500px; object-fit: contain; }
 
-        .title-section { border-bottom: 3px solid #e60012; margin-bottom: 20px; padding-bottom: 10px; }
-        .price-tag { font-size: 1.5rem; color: #e60012; font-weight: bold; }
-
-        /* スペック表 */
-        .spec-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .spec-table th, .spec-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        .spec-table th { background: #f2f2f2; width: 30%; font-size: 0.9rem; }
+        .title-section { border-bottom: 3px solid #e60012; margin-bottom: 25px; padding-bottom: 15px; }
+        .title-section h2 { margin: 0; font-size: 1.8rem; }
+        .seller-info { color: #666; font-size: 0.9rem; margin-top: 5px; }
         
-        .status-box { background: #fffde7; border: 1px solid #ffe57f; padding: 15px; border-radius: 5px; margin-top: 20px; }
-        .btn-back { display: inline-block; margin-top: 20px; color: #666; text-decoration: none; }
-        .loading { text-align: center; padding: 100px; font-size: 1.2rem; }
+        /* スペック表 */
+        .spec-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .spec-table th, .spec-table td { border: 1px solid #eee; padding: 15px; text-align: left; }
+        .spec-table th { background: #f9f9f9; width: 30%; font-weight: bold; color: #666; font-size: 0.9rem; }
+        
+        .status-box { background: #fffcf0; border: 1px solid #f0e68c; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .status-box h4 { margin-top: 0; color: #856404; }
+
+        /* 問い合わせフォーム */
+        .contact-section { background: #f0f7ff; border: 1px solid #bcdbff; padding: 25px; border-radius: 10px; margin-top: 40px; }
+        .contact-section h3 { margin-top: 0; color: #0056b3; border-bottom: 1px solid #bcdbff; padding-bottom: 10px; }
+        .contact-form input, .contact-form textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        .contact-form textarea { height: 120px; resize: vertical; }
+        .btn-send { background: #007bff; color: white; border: none; padding: 18px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: background 0.3s; }
+        .btn-send:hover { background: #0056b3; }
+
+        .btn-back { display: inline-block; margin-bottom: 15px; color: #e60012; text-decoration: none; font-weight: bold; }
+        .loading { text-align: center; padding: 100px; font-size: 1.2rem; color: #999; }
     </style>
 </head>
 <body>
 
 <header class="main-header">
-    <h1 onclick="location.href='index.html'" style="cursor:pointer;">Bus-Market</h1>
+    <h1 onclick="location.href='index.html'">Bus-Market</h1>
 </header>
 
-<main class="container" id="detail-container">
+<main class="container" id="content-area">
     <div class="loading">車両情報を読み込んでいます...</div>
 </main>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyBgNRke_RVNCM2j4whbDWwDfzXTf1SxhgFwrujGVV5D7xQwNYmwKu96tNZweoH3B79/exec";
-
-    async function loadDetail() {
-        const container = document.getElementById('detail-container');
-        
-        // URLからIDを取得
+    const GAS_URL = "https://script.google.com/macros/s/AKfycby3rOg6yiVRe1sQWlMUi3TJcx_46mFyVz3oqlJGOkpeHkhrdOTIGhzRwhalBq4xMfyz/exec";
+    
+    async function init() {
+        const area = document.getElementById('content-area');
         const params = new URLSearchParams(window.location.search);
         const targetId = params.get('id');
 
         if (!targetId) {
-            container.innerHTML = "車両IDが見つかりません。";
+            area.innerHTML = "車両IDが正しくありません。";
             return;
         }
 
         try {
             const response = await fetch(GAS_URL);
-            const data = await response.json();
-            
-            // IDが一致する車両を探す
-            const v = data.find(item => item.id == targetId);
+            const result = await response.json();
+            const vehicle = result.vehicles.find(v => v.id == targetId);
 
-            if (!v) {
-                container.innerHTML = "指定された車両は見つかりませんでした。";
+            if (!vehicle) {
+                area.innerHTML = "指定された車両は見つかりませんでした。";
                 return;
             }
 
-            // HTMLの組み立て（全項目表示）
-            container.innerHTML = `
-                <a href="index.html" class="btn-back">← 一覧に戻る</a>
+            area.innerHTML = `
+                <a href="index.html" class="btn-back">← 車両一覧へ戻る</a>
                 
                 <div class="main-image">
-                    ${v.image ? `<img src="${v.image}">` : 'NO IMAGE'}
+                    ${vehicle.image ? `<img src="${vehicle.image}">` : 'NO IMAGE'}
                 </div>
 
                 <div class="title-section">
-                    <h2 style="margin:0;">${v.title || '無題の車両'}</h2>
-                    <p style="color:#666; margin:5px 0;">出品者: ${v.owner || 'ゲスト'}</p>
+                    <h2>${vehicle.title || '無題の車両'}</h2>
+                    <div class="seller-info">出品者: ${vehicle.owner || '匿名'}</div>
                 </div>
 
-                <h3>車両スペック</h3>
+                <h3>車両スペック詳細</h3>
                 <table class="spec-table">
-                    <tr><th>メーカー</th><td>${v.maker || '-'}</td></tr>
-                    <tr><th>型式</th><td>${v.model || '-'}</td></tr>
-                    <tr><th>サイズ</th><td>${v.size || '-'}</td></tr>
-                    <tr><th>エンジン</th><td>${v.engine || '-'}</td></tr>
-                    <tr><th>燃料</th><td>${v.fuel || '-'}</td></tr>
-                    <tr><th>排気量</th><td>${v.cc || '-'} cc</td></tr>
-                    <tr><th>走行距離</th><td>${v.mileage || '-'}</td></tr>
-                    <tr><th>ミッション</th><td>${v.mission || '-'}</td></tr>
+                    <tr><th>メーカー</th><td>${vehicle.maker || '-'}</td></tr>
+                    <tr><th>型式</th><td>${vehicle.model || '-'}</td></tr>
+                    <tr><th>サイズ</th><td>${vehicle.size || '-'}</td></tr>
+                    <tr><th>エンジン</th><td>${vehicle.engine || '-'}</td></tr>
+                    <tr><th>燃料</th><td>${vehicle.fuel || '-'}</td></tr>
+                    <tr><th>排気量</th><td>${vehicle.cc ? vehicle.cc + ' cc' : '-'}</td></tr>
+                    <tr><th>走行距離</th><td>${vehicle.mileage || '-'}</td></tr>
+                    <tr><th>ミッション</th><td>${vehicle.mission || '-'}</td></tr>
                 </table>
 
                 <div class="status-box">
-                    <strong>車両の状態・備考：</strong><br>
-                    <p style="white-space: pre-wrap;">${v.status || '記載なし'}</p>
+                    <h4>車両の状態・備考</h4>
+                    <p style="white-space: pre-wrap;">${vehicle.status || '特記事項なし'}</p>
                 </div>
 
-                <div style="margin-top:30px; text-align:center;">
-                    <a href="mailto:${v.email}" style="background:#333; color:white; padding:15px 30px; text-decoration:none; border-radius:5px; font-weight:bold;">この車両について問い合わせる</a>
+                <div class="contact-section">
+                    <h3>この車両について問い合わせる</h3>
+                    <p style="font-size: 0.85rem; color: #555; margin-bottom: 20px;">
+                        ※送信された内容は販売元と事務局(aonamibus.market50@gmail.com)へ届きます。
+                    </p>
+                    <div class="contact-form">
+                        <input type="text" id="c-name" placeholder="お名前" value="${localStorage.getItem('userNickname') || ''}">
+                        <input type="email" id="c-email" placeholder="返信用メールアドレス">
+                        <textarea id="c-msg" placeholder="購入希望、内見予約、質問などをご記入ください。"></textarea>
+                        <button class="btn-send" id="send-btn" onclick="sendContact('${vehicle.email}', '${vehicle.title}')">
+                            メッセージを送信する
+                        </button>
+                    </div>
                 </div>
             `;
 
-        } catch (error) {
-            container.innerHTML = "読み込みエラーが発生しました。";
-            console.error(error);
+        } catch (e) {
+            console.error(e);
+            area.innerHTML = "データの取得中にエラーが発生しました。";
         }
     }
 
-    window.onload = loadDetail;
+    async function sendContact(sellerEmail, vehicleTitle) {
+        const name = document.getElementById('c-name').value;
+        const email = document.getElementById('c-email').value;
+        const msg = document.getElementById('c-msg').value;
+        const btn = document.getElementById('send-btn');
+
+        if (!name || !email || !msg) {
+            alert("すべての項目を入力してください。");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "送信中...";
+
+        try {
+            await fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    type: "contact",
+                    sellerEmail: sellerEmail,
+                    vehicleTitle: vehicleTitle,
+                    userName: name,
+                    userEmail: email,
+                    message: msg
+                })
+            });
+            alert("問い合わせを送信しました！販売元からの返信をお待ちください。");
+            location.reload();
+        } catch (e) {
+            alert("送信に失敗しました。時間をおいて再度お試しください。");
+            btn.disabled = false;
+            btn.innerText = "メッセージを送信する";
+        }
+    }
+
+    window.onload = init;
 </script>
 
 </body>
