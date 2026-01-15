@@ -36,3 +36,140 @@ body { font-family: sans-serif; margin: 0; background: #f8f9fa; }
 input, select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
 .form-row { display: flex; gap: 15px; } .form-row > div { flex: 1; }
 .user-badge { background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 20px; font-size: 13px; }
+#user-nav {
+    display: flex !important; /* 強制的に表示 */
+    align-items: center;
+    gap: 10px;
+    min-height: 40px; /* 高さを確保 */
+}
+
+.nav-btn {
+    background: white;
+    color: #E60012; /* 赤文字 */
+    border: none;
+    padding: 8px 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    display: inline-block; /* 消えるのを防ぐ */
+}
+#user-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* ボタン同士の間隔 */
+}
+
+.nav-btn {
+    background: white;
+    color: var(--main-red);
+    border: none;
+    padding: 8px 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* ログアウト（解除）ボタンの調整 */
+.btn-logout-small {
+    color: white;
+    background: none;
+    border: 1px solid white;
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 2px 5px;
+}
+/* ヘッダーのボタン群を右に並べる */
+#user-nav {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+}
+
+#auth-area {
+    display: inline-flex;
+}
+
+/* ボタンのデザイン：白背景 ＋ 赤文字 */
+.nav-btn {
+    background-color: #ffffff !important; /* 白背景 */
+    color: #E60012 !important;            /* 赤文字 */
+    border: none;
+    padding: 8px 18px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    white-space: nowrap;
+}
+
+.nav-btn:hover {
+    background-color: #f8f8f8 !important;
+    transform: translateY(-1px);
+}
+
+/* ログアウト（解除）ボタン */
+.btn-logout-small {
+    color: white;
+    background: none;
+    border: 1px solid white;
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    margin-left: 5px;
+    border-radius: 3px;
+}
+:root {
+    --main-red: #E60012;
+}
+
+/* ヘッダー全体の並び */
+#user-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ご要望のボタン：白背景 + 赤文字 */
+.nav-btn {
+    background-color: #ffffff !important;
+    color: var(--main-red) !important;
+    border: none;
+    padding: 8px 18px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-btn:hover {
+    background-color: #f8f8f8 !important;
+}
+
+/* メインの赤いボタン（検索や送信など） */
+.btn-red {
+    background-color: var(--main-red);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}#auth-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ログイン・出品・マイページボタン共通：白背景に赤文字 */
+.nav-btn {
+    background-color: #ffffff !important;
+    color: #E60012 !important;
+    border: none;
+    padding: 8px 16px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}

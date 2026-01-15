@@ -38,41 +38,39 @@
         </form>
     </div>
 
-    <script>
-        let imageData = "";
-        document.getElementById('imageInput').onchange = function(e) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                imageData = event.target.result;
-                document.getElementById('img-preview').innerHTML = `<img src="${imageData}" style="width:100%; height:100%; object-fit:cover;">`;
-            };
-            reader.readAsDataURL(e.target.files[0]);
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxqifQGgA39sQ9SFTzphksRS2VESA2JIKbJ08FSa9O-PCCIxV9E3u2QAVaUCB8m0xx8/exec";
+    let imageData = "";
+
+    // 画像をBase64に変換
+    document.getElementById('imageInput').onchange = (e) => {
+        const reader = new FileReader();
+        reader.onload = (event) => { imageData = event.target.result; };
+        reader.readAsDataURL(e.target.files[0]);
+    };
+
+    // フォーム送信
+    document.getElementById('postForm').onsubmit = async (e) => {
+        e.preventDefault();
+        
+        const postData = {
+            title: document.getElementById('title').value,
+            manufacturer: document.getElementById('maker').value,
+            mileage: document.getElementById('mileage').value,
+            image: imageData,
+            owner: localStorage.getItem('userNickname'),
+            owner_email: localStorage.getItem('userEmail')
         };
 
-        document.getElementById('postForm').onsubmit = function(e) {
-            e.preventDefault();
-            const all = JSON.parse(localStorage.getItem('allVehicles')) || [];
-            all.push({
-                id: Date.now(),
-                image: imageData,
-                title: document.getElementById('title').value,
-                manufacturer: document.getElementById('maker').value,
-                size: document.getElementById('size').value,
-                model_name: document.getElementById('model_name').value,
-                vin_type: document.getElementById('vin_type').value,
-                engine_type: document.getElementById('engine_type').value,
-                fuel: document.getElementById('fuel').value,
-                displacement: document.getElementById('displacement').value,
-                mileage: document.getElementById('mileage').value,
-                mission: document.getElementById('mission').value,
-                condition: document.getElementById('condition').value,
-                owner: localStorage.getItem('userNickname'),
-                ownerEmail: localStorage.getItem('userEmail'),
-                createdAt: Date.now()
-            });
-            localStorage.setItem('allVehicles', JSON.stringify(all));
-            location.href = 'index.html';
-        };
-    </script>
+        // GASへデータを送信
+        await fetch(GAS_URL, {
+            method: "POST",
+            body: JSON.stringify(postData)
+        });
+
+        alert("出品が完了しました！");
+        location.href = 'index.html';
+    };
+</script>
 </body>
 </html>

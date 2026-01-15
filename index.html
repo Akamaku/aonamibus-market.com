@@ -7,15 +7,14 @@
 </head>
 <body>
     <header class="main-header">
-        <a href="index.html" class="logo">Bus-Market</a>
-        <nav>
-            <a href="post.html">車両を出品</a>
-            <a href="mypage.html" id="auth-btn">ログイン</a>
-        </nav>
+        <h1 onclick="location.href='index.html'" style="cursor:pointer;">Bus-Market</h1>
+        <nav id="user-nav">
+            </nav>
     </header>
 
     <div class="hero">
         <h1>プロのためのバス売買マーケット</h1>
+        <p>ログインすれば誰でも自由に出品・共有が可能です</p>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="車種、メーカー、状態から探す...">
             <button onclick="searchVehicles()" class="btn-dark">検索</button>
@@ -23,30 +22,39 @@
     </div>
 
     <main class="container">
-        <div class="grid" id="vehicle-grid"></div>
+        <h2 style="border-left: 5px solid var(--red); padding-left: 15px; margin-bottom: 20px;">最新の出品車両</h2>
+        <div class="grid" id="vehicle-grid">
+            </div>
     </main>
 
-    <script>
-        const ADMIN_EMAIL = "akamaku.1rasuto@gmail.com";
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxqifQGgA39sQ9SFTzphksRS2VESA2JIKbJ08FSa9O-PCCIxV9E3u2QAVaUCB8m0xx8/exec";
+
+    // ログイン状態の確認と表示
+    function updateHeader() {
         const nickname = localStorage.getItem('userNickname');
-        const userEmail = localStorage.getItem('userEmail');
-
-        if (nickname) {
-            document.getElementById('auth-btn').innerHTML = `<span class="user-badge">👤 ${nickname}</span>`;
+        const authBtn = document.getElementById('auth-btn'); // 既存のログインボタン
+        if (nickname && authBtn) {
+            authBtn.innerHTML = `👤 ${nickname}`;
         }
+    }
 
-        function displayVehicles() {
-            const grid = document.getElementById('vehicle-grid');
-            let all = JSON.parse(localStorage.getItem('allVehicles')) || [];
-            all.sort((a, b) => b.createdAt - a.createdAt);
+    // スプレッドシートからデータを取得して表示
+    async function displayVehicles() {
+        const grid = document.getElementById('vehicle-grid');
+        grid.innerHTML = '<div class="empty-msg">読み込み中...</div>';
+
+        try {
+            const response = await fetch(GAS_URL);
+            const all = await response.json();
+            
+            // 新着順（逆順）に並べ替え
+            all.reverse();
 
             grid.innerHTML = all.length ? '' : '<div class="empty-msg">出品車両がありません</div>';
 
             all.forEach(v => {
-                const isAdmin = userEmail === ADMIN_EMAIL;
-                const deleteBtn = isAdmin ? `<button onclick="adminDelete(${v.id})" class="admin-del">🚨 管理者削除</button>` : '';
                 const imgTag = v.image ? `<img src="${v.image}" style="width:100%; height:100%; object-fit:cover;">` : 'NO IMAGE';
-                
                 grid.innerHTML += `
                     <div class="card">
                         <div class="card-img">${imgTag}</div>
@@ -54,19 +62,19 @@
                             <h3 class="card-title">${v.title}</h3>
                             <p class="card-spec">${v.manufacturer} / ${v.mileage}</p>
                             <a href="detail.html?id=${v.id}" class="btn-red-small">詳細を見る</a>
-                            <div class="card-footer">${deleteBtn} <span>出品者: ${v.owner}</span></div>
+                            <div class="card-footer" style="margin-top:10px; font-size:11px; color:#666;">
+                                出品者: ${v.owner}
+                            </div>
                         </div>
                     </div>`;
             });
+        } catch (e) {
+            grid.innerHTML = '<div class="empty-msg">データの取得に失敗しました</div>';
         }
-        function adminDelete(id) {
-            if(confirm("【管理者権限】削除しますか？")) {
-                let all = JSON.parse(localStorage.getItem('allVehicles')).filter(v => v.id !== id);
-                localStorage.setItem('allVehicles', JSON.stringify(all));
-                location.reload();
-            }
-        }
-        displayVehicles();
-    </script>
+    }
+
+    updateHeader();
+    displayVehicles();
+</script>
 </body>
 </html>
