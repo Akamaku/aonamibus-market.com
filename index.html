@@ -3,104 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus-Market | 架空バスプロのためのバス売買マーケット</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Bus-Market | 車両一覧</title>
     <style>
-        /* ヘッダー周りの微調整 */
-        #user-nav {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .user-badge {
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .empty-msg {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 50px;
-            color: #888;
-            font-size: 1.2rem;
-        }
+        /* 基本スタイル */
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; background: #f4f7f8; color: #333; }
+        .main-header { background: #e60012; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
+        .main-header h1 { margin: 0; font-size: 1.5rem; cursor: pointer; }
+        
+        /* ナビゲーション */
+        .nav-group { display: flex; gap: 10px; align-items: center; }
+        button { cursor: pointer; border: none; border-radius: 4px; padding: 8px 15px; font-weight: bold; transition: 0.2s; }
+        .btn-post { background: #fff; color: #e60012; }
+        .btn-post:hover { background: #eee; }
+        .btn-login { background: #333; color: white; }
+        .btn-mypage { background: rgba(255,255,255,0.2); color: white; border: 1px solid white; }
+
+        /* メインコンテンツ */
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+        
+        /* 検索バー */
+        .search-container { margin-bottom: 25px; }
+        #search-input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 30px; font-size: 1rem; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
+        #search-input:focus { border-color: #e60012; }
+
+        /* グリッドレイアウト */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        
+        /* 車両カード */
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .card-img { width: 100%; height: 200px; background: #eee; position: relative; overflow: hidden; }
+        .card-img img { width: 100%; height: 100%; object-fit: cover; }
+        .no-image { display: flex; align-items: center; justify-content: center; height: 100%; color: #999; }
+        
+        .card-content { padding: 15px; }
+        .card-title { font-size: 1.25rem; margin: 0 0 10px; color: #000; font-weight: bold; }
+        .card-spec { font-size: 0.9rem; color: #555; margin-bottom: 15px; line-height: 1.6; }
+        .card-spec span { display: inline-block; background: #f0f0f0; padding: 2px 8px; border-radius: 4px; margin-right: 5px; margin-bottom: 5px; }
+        
+        .btn-detail { display: block; text-align: center; background: #e60012; color: white; padding: 12px; text-decoration: none; border-radius: 6px; font-weight: bold; }
+        .btn-detail:hover { background: #cc0010; }
+
+        .loading, .empty-msg { text-align: center; padding: 50px; font-size: 1.2rem; color: #888; grid-column: 1 / -1; }
     </style>
 </head>
 <body>
+
     <header class="main-header">
-        <h1 onclick="location.href='index.html'" style="cursor:pointer;">Bus-Market</h1>
-        <nav id="user-nav"></nav>
+        <h1 onclick="location.href='index.html'">Bus-Market</h1>
+        <nav class="nav-group" id="user-nav">
+            </nav>
     </header>
 
     <main class="container">
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="メーカー、車種、型式、出品者名などで検索...">
+        </div>
+
         <div class="grid" id="vehicle-grid">
-            <div class="empty-msg">データを読み込んでいます...</div>
+            <div class="loading">データを読み込んでいます...</div>
         </div>
     </main>
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxRw7_WzWLhJ7d6LOgPOz9TPbN68gc1NWOHnk445LhtiMRQfE3fzX3035EpelA2wEVd/exec";
 
-        async function loadVehicles() {
-            const grid = document.getElementById('vehicle-grid');
-            
-            try {
-                // キャッシュ回避のためにランダムな数字を末尾に付ける
-                const response = await fetch(`${GAS_URL}?t=${Date.now()}`);
-                
-                if (!response.ok) throw new Error('Network response was not ok');
-                
-                const data = await response.json();
-                console.log("取得したデータ:", data); // ブラウザのコンソールで確認用
-
-                if (!data || data.length === 0) {
-                    grid.innerHTML = '<div class="empty-msg">出品されている車両はありません</div>';
-                    return;
-                }
-
-                grid.innerHTML = "";
-                // 最新順に表示
-                data.reverse().forEach(v => {
-                    // スプレッドシートの項目名が違っていてもエラーにならないように || で空文字を指定
-                    const title = v.title || v.車種名 || "無題の車両";
-                    const maker = v.maker || v.メーカー || "";
-                    const mileage = v.mileage || v.走行距離 || "-";
-                    const img = v.image || v.画像 || "";
-
-                    grid.innerHTML += `
-                        <div class="card">
-                            <div class="card-img">
-                                ${img ? `<img src="${img}">` : '<div style="height:200px; background:#ddd; display:flex; align-items:center; justify-content:center;">NO IMAGE</div>'}
-                            </div>
-                            <div class="card-content">
-                                <h3 class="card-title">${title}</h3>
-                                <p class="card-spec">${maker} / ${mileage}</p>
-                                <a href="detail.html?id=${v.id}" class="btn-red-small">詳細を見る</a>
-                                <div style="font-size:10px; color:#999; margin-top:5px;">出品者: ${v.owner || 'ゲスト'}</div>
-                            </div>
-                        </div>`;
-                });
-
-            } catch (error) {
-                console.error("エラー詳細:", error);
-                grid.innerHTML = `<div class="empty-msg">
-                    データの読み込みに失敗しました。<br>
-                    <small style="color:red;">理由: ${error.message}</small><br><br>
-                    <button onclick="location.reload()" class="btn-dark">再読み込み</button>
-                </div>`;
-            }
-        }
-
-        // ログイン状態の表示
+        // 1. ログイン状態の確認とヘッダー更新
         function updateHeader() {
             const nav = document.getElementById('user-nav');
             const nickname = localStorage.getItem('userNickname');
+            
             if (nickname) {
-                nav.innerHTML = `<span style="color:white; margin-right:10px;">👤 ${nickname}</span>
-                                 <button class="nav-btn" onclick="location.href='post.html'">出品する</button>`;
+                nav.innerHTML = `
+                    <button class="btn-mypage" onclick="location.href='mypage.html'">👤 ${nickname}さん</button>
+                    <button class="btn-post" onclick="location.href='post.html'">出品する</button>
+                    <button class="btn-login" onclick="logout()">ログアウト</button>
+                `;
             } else {
-                nav.innerHTML = `<button class="nav-btn" onclick="location.href='login.html'">ログイン</button>`;
+                nav.innerHTML = `
+                    <button class="btn-login" onclick="location.href='login.html'">ログイン / 新規登録</button>
+                `;
             }
         }
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        // 2. 車両データの読み込み（修正版）
+        async function loadVehicles() {
+            const grid = document.getElementById('vehicle-grid');
+            try {
+                const response = await fetch(GAS_URL);
+                const result = await response.json();
+
+                // GASの戻り値が { vehicles: [...], comments: [...] } の形式であることを考慮
+                const data = result.vehicles || [];
+
+                if (data.length === 0) {
+                    grid.innerHTML = '<div class="empty-msg">現在、出品されている車両はありません。</div>';
+                    return;
+                }
+
+                grid.innerHTML = ""; 
+
+                // 配列をコピーして逆順（新着順）にする
+                [...data].reverse().forEach(v => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    const searchText = `${v.title} ${v.maker} ${v.model} ${v.owner}`.toLowerCase();
+                    card.setAttribute('data-search', searchText);
+
+                    card.innerHTML = `
+                        <div class="card-img">
+                            ${v.image ? `<img src="${v.image}" alt="車両画像">` : '<div class="no-image">NO IMAGE</div>'}
+                        </div>
+                        <div class="card-content">
+                            <div class="card-title">${v.title || '無題の車両'}</div>
+                            <div class="card-spec">
+                                <span>メーカー: ${v.maker || '-'}</span>
+                                <span>型式: ${v.model || '-'}</span><br>
+                                <span>走行: ${v.mileage || '-'}</span>
+                                <span>ミッション: ${v.mission || '-'}</span><br>
+                                <small>出品者: ${v.owner || 'ゲスト'}</small>
+                            </div>
+                            <a href="detail.html?id=${v.id}" class="btn-detail">詳細を見る</a>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Fetch error:", error);
+                grid.innerHTML = '<div class="empty-msg">データの読み込みに失敗しました。</div>';
+            }
+        }
+
+        // 3. 検索機能
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const keyword = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                const content = card.getAttribute('data-search');
+                card.style.display = content.includes(keyword) ? 'block' : 'none';
+            });
+        });
 
         window.onload = () => {
             updateHeader();
@@ -108,6 +157,4 @@
         };
     </script>
 </body>
-
 </html>
-
