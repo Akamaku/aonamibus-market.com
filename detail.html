@@ -8,164 +8,69 @@
         body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; background: #f4f7f8; color: #333; line-height: 1.6; }
         .main-header { background: #e60012; color: white; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .main-header h1 { margin: 0; cursor: pointer; font-size: 1.5rem; }
-        
         .container { max-width: 900px; margin: 20px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        
-        /* 画像エリア */
         .main-image { width: 100%; border-radius: 8px; margin-bottom: 25px; background: #eee; min-height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #ddd; }
         .main-image img { width: 100%; height: auto; max-height: 500px; object-fit: contain; }
-
         .title-section { border-bottom: 3px solid #e60012; margin-bottom: 25px; padding-bottom: 15px; }
         .title-section h2 { margin: 0; font-size: 1.8rem; }
         .vehicle-id-tag { display: inline-block; background: #333; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 10px; }
-        
-        /* スペック表 */
         .spec-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
         .spec-table th, .spec-table td { border: 1px solid #eee; padding: 15px; text-align: left; }
         .spec-table th { background: #f9f9f9; width: 30%; font-weight: bold; color: #666; font-size: 0.9rem; }
-        
         .status-box { background: #fffcf0; border: 1px solid #f0e68c; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
-        .status-box h4 { margin-top: 0; color: #856404; }
-
-        /* 問い合わせフォーム（事務局仲介用） */
-        .contact-section { background: #fff5f5; border: 1px solid #feb2b2; padding: 25px; border-radius: 10px; margin-top: 40px; }
-        .contact-section h3 { margin-top: 0; color: #c53030; border-bottom: 1px solid #feb2b2; padding-bottom: 10px; }
-        .contact-notice { font-size: 0.85rem; color: #742a2a; background: #fff1f1; padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #fed7d7; }
-        
-        .contact-form input, .contact-form textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
-        .contact-form textarea { height: 120px; resize: vertical; }
-        
-        .btn-send { background: #e60012; color: white; border: none; padding: 18px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
-        .btn-send:hover { background: #c1000f; }
-        .btn-send:disabled { background: #ccc; cursor: not-allowed; }
-
+        .contact-btn-area { margin-top: 40px; text-align: center; padding: 20px; border-top: 1px dashed #ddd; }
+        .btn-go-contact { display: block; background: #e60012; color: white; padding: 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 1.2rem; transition: 0.3s; }
+        .btn-go-contact:hover { background: #c1000f; }
         .btn-back { display: inline-block; margin-bottom: 15px; color: #e60012; text-decoration: none; font-weight: bold; }
         .loading { text-align: center; padding: 100px; font-size: 1.2rem; color: #999; }
     </style>
 </head>
 <body>
-
-<header class="main-header">
-    <h1 onclick="location.href='index.html'">Bus-Market</h1>
-</header>
-
-<main class="container" id="content-area">
-    <div class="loading">車両情報を読み込んでいます...</div>
-</main>
+<header class="main-header"><h1 onclick="location.href='index.html'">Bus-Market</h1></header>
+<main class="container" id="content-area"><div class="loading">車両情報を読み込んでいます...</div></main>
 
 <script>
-    // 最新のGAS URL
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyD62tpSMHLqjuLctY3X8uZGXCmb_6FaDEJJYoC5NuoEhVSwbd_wiFpqLphqi-eCKOT/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyPXNNY56ZSXQNZIw4dEaKeCydUZFneuiXIJxcvMwMTQ_8Z0QghRXw9Aibq55zK41rb/exec";
     
     async function init() {
         const area = document.getElementById('content-area');
         const params = new URLSearchParams(window.location.search);
         const targetId = params.get('id');
-
-        if (!targetId) {
-            area.innerHTML = "車両IDが正しくありません。";
-            return;
-        }
+        if (!targetId) { area.innerHTML = "車両IDが不足しています。"; return; }
 
         try {
             const response = await fetch(GAS_URL);
             const result = await response.json();
             const vehicle = result.vehicles.find(v => v.id == targetId);
-
-            if (!vehicle) {
-                area.innerHTML = "指定された車両は見つかりませんでした。";
-                return;
-            }
+            if (!vehicle) { area.innerHTML = "車両が見つかりませんでした。"; return; }
 
             area.innerHTML = `
-                <a href="index.html" class="btn-back">← 車両一覧へ戻る</a>
-                
-                <div class="main-image">
-                    ${vehicle.image ? `<img src="${vehicle.image}">` : 'NO IMAGE'}
-                </div>
-
+                <a href="index.html" class="btn-back">← 一覧に戻る</a>
+                <div class="main-image">${vehicle.image ? `<img src="${vehicle.image}">` : 'NO IMAGE'}</div>
                 <div class="title-section">
-                    <div class="vehicle-id-tag">車両ID: ${vehicle.id}</div>
+                    <div class="vehicle-id-tag">管理番号: ${vehicle.id}</div>
                     <h2>${vehicle.title || '無題の車両'}</h2>
                 </div>
-
-                <h3>車両スペック詳細</h3>
+                <h3>車両スペック</h3>
                 <table class="spec-table">
                     <tr><th>メーカー</th><td>${vehicle.maker || '-'}</td></tr>
                     <tr><th>型式</th><td>${vehicle.model || '-'}</td></tr>
                     <tr><th>サイズ</th><td>${vehicle.size || '-'}</td></tr>
                     <tr><th>エンジン</th><td>${vehicle.engine || '-'}</td></tr>
                     <tr><th>燃料</th><td>${vehicle.fuel || '-'}</td></tr>
-                    <tr><th>排気量</th><td>${vehicle.cc ? vehicle.cc + ' cc' : '-'}</td></tr>
+                    <tr><th>排気量</th><td>${vehicle.cc || '-'} cc</td></tr>
                     <tr><th>走行距離</th><td>${vehicle.mileage || '-'}</td></tr>
                     <tr><th>ミッション</th><td>${vehicle.mission || '-'}</td></tr>
+                    <tr><th>商品ID</th><td style="font-weight:bold; color:#e60012;">${vehicle.id}</td></tr>
                 </table>
-
-                <div class="status-box">
-                    <h4>車両の状態・備考</h4>
-                    <p style="white-space: pre-wrap;">${vehicle.status || '特記事項なし'}</p>
-                </div>
-
-                <div class="contact-section">
-                    <h3>この車両について事務局へ問い合わせる</h3>
-                    <div class="contact-notice">
-                        こちらは事務局宛の問い合わせフォームです。送信後、内容を確認の上、事務局より出品者へお繋ぎ、または担当者より回答させていただきます。
-                    </div>
-                    <div class="contact-form">
-                        <input type="text" id="c-name" placeholder="お名前" value="${localStorage.getItem('userNickname') || ''}">
-                        <input type="email" id="c-email" placeholder="あなたのメールアドレス">
-                        <textarea id="c-msg" placeholder="購入の意思、内見の希望、質問などをご記入ください。"></textarea>
-                        <button class="btn-send" id="send-btn" onclick="sendContact('${vehicle.id}', '${vehicle.title}')">
-                            事務局へメッセージを送信する
-                        </button>
-                    </div>
+                <div class="status-box"><strong>備考・状態：</strong><p style="white-space: pre-wrap; margin-top:10px;">${vehicle.status || '特記事項なし'}</p></div>
+                <div class="contact-btn-area">
+                    <p style="margin-bottom:15px; color:#666; font-size:0.9rem;">この車両についてのご質問はメールより事務局(aonamibis.market50@gmail.com)までご連絡ください。</p>
                 </div>
             `;
-
-        } catch (e) {
-            console.error(e);
-            area.innerHTML = "データの取得中にエラーが発生しました。";
-        }
+        } catch (e) { area.innerHTML = "データの読み込みに失敗しました。"; }
     }
-
-    async function sendContact(vId, vehicleTitle) {
-        const name = document.getElementById('c-name').value;
-        const email = document.getElementById('c-email').value;
-        const msg = document.getElementById('c-msg').value;
-        const btn = document.getElementById('send-btn');
-
-        if (!name || !email || !msg) {
-            alert("すべての項目を入力してください。");
-            return;
-        }
-
-        btn.disabled = true;
-        btn.innerText = "送信中...";
-
-        try {
-            const response = await fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    type: "contact",
-                    vehicleId: vId,       // 管理者が特定するためのID
-                    vehicleTitle: vehicleTitle,
-                    userName: name,
-                    userEmail: email,
-                    message: msg
-                })
-            });
-            
-            alert("事務局へ送信されました。内容を確認後、折り返しご連絡いたします。");
-            location.reload();
-        } catch (e) {
-            alert("送信に失敗しました。ネットワーク環境を確認の上、再度お試しください。");
-            btn.disabled = false;
-            btn.innerText = "事務局へメッセージを送信する";
-        }
-    }
-
     window.onload = init;
 </script>
-
 </body>
 </html>
